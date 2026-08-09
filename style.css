@@ -588,3 +588,17 @@ footer {
     .about .contact { padding: 0.75rem; }
     .about .contact-link i { font-size: 1rem; }
 }
+.page-hero {
+    padding: 6rem 5% 2rem;
+    text-align: center;
+}
+
+.page-hero h1 {
+    font-size: clamp(2rem, 6vw, 3rem);
+}
+
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 4rem 2% 1.5rem;
+    }
+}
