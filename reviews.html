@@ -12,7 +12,7 @@
 </head>
 <body>
   <header>
-    <a href="index.html#home" class="logo">Rapti Nursery</a>
+    <a href="index.html" class="logo">Rapti Nursery</a>
     <div class="hamburger">
       <span></span>
       <span></span>
@@ -35,6 +35,22 @@
       <h1>Customer Reviews</h1>
     </section>
 
+    <section id="reviews" class="reviews section visible">
+      <div class="reviews-container">
+        <div class="review-card" data-review="0">
+          <p>"Amazing plants and great service! Highly recommend Rapti Nursery for anyone looking to green up their space."</p>
+          <a href="https://maps.app.goo.gl/wbjWQoeJ5ew8ZoAR8" target="_blank" rel="noopener noreferrer" class="review-link">See Review on Google Maps</a>
+        </div>
+        <div class="review-card" data-review="1">
+          <p>"The decoration services were top-notch for my wedding. The team was professional and creative!"</p>
+          <a href="https://maps.app.goo.gl/pev6xSVzjVTRtdJQ9" target="_blank" rel="noopener noreferrer" class="review-link">See Review on Google Maps</a>
+        </div>
+        <div class="review-card" data-review="2">
+          <p>"Loved the variety of plants and the friendly staff. Will definitely be back for more!"</p>
+          <a href="https://maps.app.goo.gl/9tScHV5nCy5gnhTB6" target="_blank" rel="noopener noreferrer" class="review-link">See Review on Google Maps</a>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -58,6 +74,34 @@
             nav.classList.remove('active');
             hamburger.classList.remove('active');
         });
+    });
+
+    // Review cycling
+    const reviewCards = document.querySelectorAll('.review-card');
+    let currentReview = 0;
+
+    function showReview(index) {
+        reviewCards.forEach((card, i) => {
+            card.style.display = i === index ? 'block' : 'none';
+        });
+    }
+
+    function cycleReviews() {
+        currentReview = (currentReview + 1) % reviewCards.length;
+        showReview(currentReview);
+    }
+
+    showReview(currentReview);
+    let reviewInterval = setInterval(cycleReviews, 4000);
+
+    document.querySelector('.reviews-container').addEventListener('mouseenter', () => {
+        clearInterval(reviewInterval);
+        reviewCards.forEach(card => card.style.animationPlayState = 'paused');
+    });
+
+    document.querySelector('.reviews-container').addEventListener('mouseleave', () => {
+        reviewInterval = setInterval(cycleReviews, 4000);
+        reviewCards.forEach(card => card.style.animationPlayState = 'running');
     });
   </script>
 </body>
