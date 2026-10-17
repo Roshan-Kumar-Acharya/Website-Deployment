@@ -1,10 +1,16 @@
 /* ===== Rapti Nursery – shop data layer =====
    Works in DEMO mode (data saved in this browser only) until you paste
    your Firebase config below. Then data is shared with every visitor. */
-const CFG = {
-  firebase: null,            // paste your Firebase web config object here (see README)
+ const firebaseConfig = {
+    apiKey: "AIzaSyBjFbmMvv5giRsFYVstwawH4LUcxfV4Q2o",
+    authDomain: "rapti-nursery.firebaseapp.com",
+    projectId: "rapti-nursery",
+    storageBucket: "rapti-nursery.firebasestorage.app",
+    messagingSenderId: "115100069000",
+    appId: "1:115100069000:web:257dbc06f5ed9d1787433d"
+  };,            // paste your Firebase web config object here 
   whatsapp: "9779857820985", // shop WhatsApp number (country code, no +)
-  demoPassword: "rapti123"   // only used in demo mode
+  demoPassword: "rapti1234"   // only used in demo mode
 };
 const SEED = [
   {id:"p1",name:"Grafted Mango Plant (कलम आम)",category:"Fruit Saplings",price:450,discount:0,stock:15,description:"Healthy, high-yielding grafted mango sapling in nursery polybag. Starts fruiting earlier.",care:"Full sunlight, water moderately",image:""},
