@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapti Nursery – Gallery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">Rapti Nursery</a>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html" data-section="home">Home</a></li>
+        <li><a href="products.html" data-section="products" >Products</a></li>
+        <li><a href="services.html" data-section="services" >Decoration Services</a></li>
+        <li><a href="gallery.html" data-section="gallery" class="active">Gallery</a></li>
+        <li><a href="reviews.html" data-section="reviews" >Reviews</a></li>
+        <li><a href="about.html" data-section="about" >About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <h1>Photo Gallery</h1>
+    </section>
+
+    <section id="gallery" class="gallery section visible">
+      <div class="gallery-grid">
+        <img src="images/gallery1.jpg" alt="Garden setup at Rapti Nursery">
+        <img src="images/gallery2.jpg" alt="Wedding decoration by Rapti Nursery">
+        <img src="images/gallery3.jpg" alt="Handmade bouquet display">
+        <img src="images/gallery4.jpg" alt="Nursery plant collection">
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p style="font-size:1.125rem;">© 2025 Rapti Nursery. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('nav');
+
+    if (hamburger) {
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+    }
+
+    // Close mobile nav when clicking a link
+    document.querySelectorAll('nav a').forEach(function(a) {
+        a.addEventListener('click', function() {
+            nav.classList.remove('active');
+            hamburger.classList.remove('active');
+        });
+    });
+  </script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script>
+</body>
+</html>

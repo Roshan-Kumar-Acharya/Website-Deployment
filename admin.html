@@ -1,0 +1,58 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex"><title>Owner Dashboard – Rapti Nursery</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css"></head><body>
+<div class="admin-bar"><b>Owner Dashboard – Rapti Nursery</b><span><a href="index.html">View site</a> &nbsp; <button id="out" hidden>Logout</button></span></div>
+<div class="shop-wrap" id="app"></div>
+<dialog id="dlg"><h3 id="dt">Plant</h3>
+<label>Name</label><input id="f_name">
+<div class="g2"><div><label>Category</label><select id="f_cat"><option>Fruit Saplings</option><option>Flowering</option><option>Indoor Plants</option><option>Outdoor Plants</option><option>Seeds &amp; Supplies</option></select></div>
+<div><label>Stock</label><input id="f_stock" type="number" min="0"></div>
+<div><label>Price (Rs.)</label><input id="f_price" type="number" min="0"></div>
+<div><label>Discount %</label><input id="f_disc" type="number" min="0" max="90"></div></div>
+<label>Description</label><textarea id="f_desc" rows="3"></textarea>
+<label>Care instructions</label><input id="f_care">
+<label>Photo (from phone/gallery)</label><input id="f_img" type="file" accept="image/*">
+<div class="row"><button class="btn" id="save">Save</button><button class="btn" style="background:#999" id="cancel">Cancel</button></div></dialog>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script>
+<script>
+const $=id=>document.getElementById(id),app=$('app');let editing=null,imgData=null;
+const authed=()=>Shop.live?!!firebase.auth().currentUser:sessionStorage.getItem('rapti_admin')==='1';
+function login(){
+ app.innerHTML=`<div style="max-width:340px;margin:3rem auto"><h2>Owner login</h2>
+ ${Shop.live?'<label>Email</label><input id="em" type="email" style="width:100%;padding:.6rem;margin-bottom:.6rem">':'<div class="banner">Demo mode – password: <b>'+CFG.demoPassword+'</b></div>'}
+ <label>Password</label><input id="pw" type="password" style="width:100%;padding:.6rem"><p id="err" style="color:#c62828"></p><button class="btn" id="go">Login</button></div>`;
+ $('go').onclick=async()=>{try{
+  if(Shop.live)await firebase.auth().signInWithEmailAndPassword($('em').value,$('pw').value);
+  else if($('pw').value===CFG.demoPassword)sessionStorage.setItem('rapti_admin','1');else throw 0;
+  render()}catch(e){$('err').textContent='Wrong login'}}}
+async function render(){
+ if(!authed())return login();
+ $('out').hidden=false;
+ const l=await Shop.list();
+ app.innerHTML=`${Shop.live?'':'<div class="banner">Demo mode: changes are saved only in this browser. Connect Firebase (see README) to update the live site.</div>'}
+ <div class="stats"><div class="stat">Total varieties<b>${l.length}</b></div><div class="stat">Total stock units<b>${l.reduce((a,p)=>a+(+p.stock||0),0)}</b></div></div>
+ <h2>Manage Store Inventory</h2>`+l.map(p=>`<div class="item">
+ ${p.image?`<img class="thumb" src="${esc(p.image)}">`:'<div class="thumb"></div>'}
+ <div class="info"><b>${esc(p.name)}</b><br><small>${esc(p.category)} | ${Shop.priceHTML(p)}</small></div>
+ <div class="stock">Stock <button data-a="dec" data-id="${p.id}">−</button><b>${p.stock}</b><button data-a="inc" data-id="${p.id}">+</button></div>
+ <button class="icon ed" data-a="edit" data-id="${p.id}"><i class="fas fa-pen"></i></button>
+ <button class="icon del" data-a="del" data-id="${p.id}"><i class="fas fa-trash"></i></button></div>`).join('')
+ +'<button class="fab" data-a="add"><i class="fas fa-plus"></i> Add New Plant</button>';
+ app.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a,p=l.find(x=>x.id===b.dataset.id);
+  if(a==='inc'||a==='dec'){p.stock=Math.max(0,p.stock+(a==='inc'?1:-1));await Shop.save(p);render()}
+  if(a==='del'&&confirm('Delete '+p.name+'?')){await Shop.remove(p.id);render()}
+  if(a==='edit')openForm(p);if(a==='add')openForm(null)}}
+function openForm(p){editing=p;imgData=null;$('dt').textContent=p?'Edit plant':'Add new plant';
+ $('f_name').value=p?.name||'';$('f_cat').value=p?.category||'Fruit Saplings';$('f_stock').value=p?.stock??0;$('f_price').value=p?.price??0;
+ $('f_disc').value=p?.discount??0;$('f_desc').value=p?.description||'';$('f_care').value=p?.care||'';$('f_img').value='';$('dlg').showModal()}
+$('f_img').onchange=e=>{const f=e.target.files[0];if(!f)return;const im=new Image();im.onload=()=>{const s=Math.min(1,700/Math.max(im.width,im.height)),c=document.createElement('canvas');
+ c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);imgData=c.toDataURL('image/jpeg',.75)};im.src=URL.createObjectURL(f)};
+$('cancel').onclick=()=>$('dlg').close();
+$('save').onclick=async()=>{if(!$('f_name').value.trim())return alert('Enter a name');
+ await Shop.save({...(editing||{}),name:$('f_name').value.trim(),category:$('f_cat').value,stock:+$('f_stock').value||0,price:+$('f_price').value||0,
+ discount:Math.min(90,Math.max(0,+$('f_disc').value||0)),description:$('f_desc').value,care:$('f_care').value,image:imgData||editing?.image||''});
+ $('dlg').close();render()};
+$('out').onclick=async()=>{Shop.live?await firebase.auth().signOut():sessionStorage.removeItem('rapti_admin');location.reload()};
+Shop.live?firebase.auth().onAuthStateChanged(render):render();
+</script></body></html>

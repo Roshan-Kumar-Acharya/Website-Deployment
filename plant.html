@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Rapti Nursery – Plant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css"></head><body>
+<header><a href="index.html" class="logo">Rapti Nursery</a><div class="hamburger"><span></span><span></span><span></span></div><nav><ul>
+<li><a href="index.html">Home</a></li><li><a href="products.html">Products</a></li><li><a href="services.html">Decoration Services</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="reviews.html">Reviews</a></li><li><a href="about.html">About</a></li></ul></nav></header>
+<main><div class="shop-wrap" id="root"><p>Loading…</p></div></main>
+<footer><p>© 2025 Rapti Nursery. All rights reserved.</p></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script><script>const h=document.querySelector('.hamburger'),n=document.querySelector('nav');h.onclick=()=>{h.classList.toggle('active');n.classList.toggle('active')}</script>
+<script>
+(async()=>{
+ const id=new URLSearchParams(location.search).get('id'),p=await Shop.get(id),r=document.getElementById('root');
+ if(!p){r.innerHTML='<p>Plant not found. <a href="products.html">Back to products</a></p>';return}
+ document.title=p.name+' – Rapti Nursery';const out=p.stock<=0;let q=1;
+ r.innerHTML=`<p><a href="products.html">← All plants</a></p><div class="detail">
+ <div class="detail-img">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}">`:'<div class="noimg"><i class="fas fa-leaf"></i></div>'}</div>
+ <div><div class="cat">${esc(p.category)}</div><h1>${esc(p.name)}</h1>
+ <p style="font-size:1.4rem">${Shop.priceHTML(p)} <small class="${out?'oos':'ins'}">${out?'Out of stock':'In stock ('+p.stock+' left)'}</small></p><hr>
+ <h3>About this plant</h3><p>${esc(p.description)}</p>
+ ${p.care?`<div class="care"><b>Care:</b> ${esc(p.care)}</div>`:''}
+ <div class="row"><div class="qty"><button id="m">−</button><span id="qn">1</span><button id="pl">+</button></div>
+ <button class="btn" id="add" ${out?'disabled':''}><i class="fas fa-cart-plus"></i> Add to Cart</button></div>
+ <button class="btn-wa ${out?'disabled':''}" id="buy"><i class="fab fa-whatsapp"></i> Order now via WhatsApp</button><p id="msg" class="ins"></p></div></div>`;
+ const $=i=>document.getElementById(i);
+ $('m').onclick=()=>{q=Math.max(1,q-1);$('qn').textContent=q};$('pl').onclick=()=>{q=Math.min(Math.max(p.stock,1),q+1);$('qn').textContent=q};
+ $('add').onclick=()=>{Shop.add(p.id,q);$('msg').textContent='✓ Added to cart. Keep shopping or open your cart.'};
+ $('buy').onclick=()=>{Shop.add(p.id,q);location.href='cart.html'};
+})();</script></body></html>

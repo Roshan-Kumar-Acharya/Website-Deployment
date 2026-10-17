@@ -1,0 +1,31 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Rapti Nursery – Your Cart</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css"></head><body>
+<header><a href="index.html" class="logo">Rapti Nursery</a><div class="hamburger"><span></span><span></span><span></span></div><nav><ul>
+<li><a href="index.html">Home</a></li><li><a href="products.html">Products</a></li><li><a href="services.html">Decoration Services</a></li><li><a href="gallery.html">Gallery</a></li><li><a href="reviews.html">Reviews</a></li><li><a href="about.html">About</a></li></ul></nav></header>
+<main><section class="page-hero"><h1>Your Cart</h1></section><div class="shop-wrap" id="root"><p>Loading…</p></div></main>
+<footer><p>© 2025 Rapti Nursery. All rights reserved.</p></footer>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script><script>const h=document.querySelector('.hamburger'),n=document.querySelector('nav');h.onclick=()=>{h.classList.toggle('active');n.classList.toggle('active')}</script>
+<script>
+const root=document.getElementById('root'),fmt=n=>n.toLocaleString('en-IN');let plants=[];
+function lines(){return Shop.cart().map(i=>({p:plants.find(p=>p.id===i.id),qty:i.qty})).filter(l=>l.p&&l.p.stock>0).map(l=>({p:l.p,qty:Math.min(l.qty,l.p.stock)}))}
+function save(ls){Shop.setCart(ls.map(l=>({id:l.p.id,qty:l.qty})))}
+function draw(){const ls=lines();save(ls);
+ if(!ls.length){root.innerHTML='<p>Your cart is empty. <a href="products.html">Browse plants</a></p>';return}
+ const total=ls.reduce((a,l)=>a+finalPrice(l.p)*l.qty,0);
+ root.innerHTML=ls.map((l,i)=>`<div class="item">${l.p.image?`<img class="thumb" src="${esc(l.p.image)}">`:'<div class="thumb"></div>'}
+ <div class="info"><b>${esc(l.p.name)}</b><br><small>Rs. ${finalPrice(l.p)} each</small></div>
+ <div class="qty"><button data-i="${i}" data-d="-1">−</button><span>${l.qty}</span><button data-i="${i}" data-d="1">+</button></div>
+ <b>Rs. ${fmt(finalPrice(l.p)*l.qty)}</b><button class="icon del" data-i="${i}" data-d="x"><i class="fas fa-trash"></i></button></div>`).join('')+
+ `<h2 style="text-align:right">Total: Rs. ${fmt(total)}</h2>
+ <label>Your name</label><input id="nm" class="field" placeholder="e.g. Shubham"><label>Delivery location</label><input id="loc" class="field" placeholder="e.g. Kathmandu">
+ <p id="err" style="color:#c62828"></p>
+ <button class="btn-wa" id="send" style="width:100%;cursor:pointer;background:#25d366;color:#fff;border-color:#25d366"><i class="fab fa-whatsapp"></i> Send order on WhatsApp</button>
+ <p><small>Delivery charges are confirmed on WhatsApp. No online payment needed.</small></p>`;
+ root.onclick=e=>{const b=e.target.closest('button[data-i]');if(!b)return;const l=lines(),x=l[+b.dataset.i];
+  if(b.dataset.d==='x')l.splice(+b.dataset.i,1);else x.qty=Math.max(1,Math.min(x.p.stock,x.qty+ +b.dataset.d));save(l);draw()};
+ document.getElementById('send').onclick=()=>{const n=document.getElementById('nm').value.trim(),c=document.getElementById('loc').value.trim();
+  if(!n||!c){document.getElementById('err').textContent='Please enter your name and delivery location.';return}
+  window.open(Shop.orderLink(lines(),n,c),'_blank')}}
+Shop.list().then(l=>{plants=l;draw()});</script></body></html>

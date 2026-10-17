@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapti Nursery – About</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">Rapti Nursery</a>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="index.html" data-section="home">Home</a></li>
+        <li><a href="products.html" data-section="products" >Products</a></li>
+        <li><a href="services.html" data-section="services" >Decoration Services</a></li>
+        <li><a href="gallery.html" data-section="gallery" >Gallery</a></li>
+        <li><a href="reviews.html" data-section="reviews" >Reviews</a></li>
+        <li><a href="about.html" data-section="about" class="active">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <h1>About Rapti Nursery</h1>
+    </section>
+
+    <section id="about" class="about section visible">
+      <img src="images/about.jpg" alt="About Rapti Nursery" class="about-image">
+      <p>At Rapti Nursery, we pour our heart and soul into every plant we nurture, driven by a deep passion for nature’s beauty. We understand the joy a single blooming flower can bring, the peace a lush green corner can offer, and the memories a thoughtfully decorated event can create. Our dedicated team works tirelessly to bring you the finest plants and bespoke decoration services, ensuring that every leaf and petal reflects our commitment to quality. Whether you’re a homeowner looking to transform your space or someone planning a special celebration, we’re here to help you connect with nature in a way that feels personal and meaningful. Let us bring the magic of greenery into your life, one plant at a time.</p>
+      <h3 class="slogan">Let's Grow Together</h3>
+
+      <div class="social">
+        <a href="https://www.facebook.com/people/Rapti-Nursery-Banaspati-Uddhan/100057600589616/" target="_blank" rel="noopener noreferrer" class="social-link"><i class="fab fa-facebook-f"></i> Facebook</a>
+        <a href="https://www.instagram.com/rapti_nursery/" target="_blank" rel="noopener noreferrer" class="social-link"><i class="fab fa-instagram"></i> Instagram</a>
+        <a href="https://www.tiktok.com/@raptinursery" target="_blank" rel="noopener noreferrer" class="social-link"><i class="fab fa-tiktok"></i> TikTok</a>
+      </div>
+
+      <div class="contact">
+        <a href="tel:+9779857820985" class="contact-link"><i class="fas fa-phone-alt"></i> 9857820985</a>
+        <a href="tel:+9779847831731" class="contact-link"><i class="fas fa-phone-alt"></i> 9847831731</a>
+        <a href="https://wa.me/9857820985" target="_blank" rel="noopener noreferrer" class="contact-link"><i class="fab fa-whatsapp"></i> 9857820985</a>
+        <a href="mailto:roshan.ach98@gmail.com" class="contact-link"><i class="fas fa-envelope"></i> roshan.ach98@gmail.com</a>
+      </div>
+
+      <p class="address"><i class="fas fa-map-marker-alt"></i> F015, Tulsipur-6, Dang, Nepal | <a href="https://maps.app.goo.gl/2Xxr26ZovwLnqXrb7" target="_blank" rel="noopener noreferrer">View on Google Maps</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p style="font-size:1.125rem;">© 2025 Rapti Nursery. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const hamburger = document.querySelector('.hamburger');
+    const nav = document.querySelector('nav');
+
+    if (hamburger) {
+        hamburger.addEventListener('click', function() {
+            hamburger.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+    }
+
+    // Close mobile nav when clicking a link
+    document.querySelectorAll('nav a').forEach(function(a) {
+        a.addEventListener('click', function() {
+            nav.classList.remove('active');
+            hamburger.classList.remove('active');
+        });
+    });
+  </script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script>
+</body>
+</html>
