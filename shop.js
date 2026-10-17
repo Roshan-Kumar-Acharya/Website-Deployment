@@ -9,7 +9,7 @@
     storageBucket: "rapti-nursery.firebasestorage.app",
     messagingSenderId: "115100069000",
     appId: "1:115100069000:web:257dbc06f5ed9d1787433d"
-  };,            // paste your Firebase web config object here 
+  },            // paste your Firebase web config object here 
   whatsapp: "9779857820985", // shop WhatsApp number (country code, no +)
   demoPassword: "rapti1234"   // only used in demo mode
 };
