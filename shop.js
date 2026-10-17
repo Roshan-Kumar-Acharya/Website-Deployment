@@ -1,7 +1,8 @@
 /* ===== Rapti Nursery – shop data layer =====
    Works in DEMO mode (data saved in this browser only) until you paste
    your Firebase config below. Then data is shared with every visitor. */
- const firebaseConfig = {
+ const CFG = {
+    firebase: {
     apiKey: "AIzaSyBjFbmMvv5giRsFYVstwawH4LUcxfV4Q2o",
     authDomain: "rapti-nursery.firebaseapp.com",
     projectId: "rapti-nursery",
