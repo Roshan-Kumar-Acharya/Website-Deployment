@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex"><title>Owner Dashboard – Rapti Nursery</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css"><link rel="stylesheet" href="shop.css"></head><body>
+<div class="admin-bar"><b>Owner Dashboard – Rapti Nursery</b><span><a href="index.html">View site</a> &nbsp; <button id="out" hidden>Logout</button></span></div>
+<div class="tabs" id="tabs" hidden></div>
+<div class="shop-wrap" id="app" style="width:100%"></div>
+<dialog id="dlg"></dialog>
+<input type="file" id="multi" accept="image/*" multiple hidden>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script><script src="shop.js"></script><script src="app.js"></script>
+<script>
+const $=id=>document.getElementById(id),app=$('app');let tab='plants';
+const TABS={plants:'Plants',services:'Decoration Services',gallery:'Gallery',home:'Home & About photos',footer:'Footer & Business info'};
+const authed=()=>Shop.live?!!firebase.auth().currentUser:sessionStorage.getItem('rapti_admin')==='1';
+const demo=()=>Shop.live?'':'<div class="banner">Demo mode: changes are saved only in this browser. Connect Firebase to update the live site.</div>';
+/* crop to a fixed shape so every photo on the site is the same size */
+const crop=(f,w,h)=>new Promise(r=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;const s=Math.max(w/im.width,h/im.height),dw=im.width*s,dh=im.height*s;c.getContext('2d').drawImage(im,(w-dw)/2,(h-dh)/2,dw,dh);r(c.toDataURL('image/jpeg',.78))};im.src=URL.createObjectURL(f)});
+const IMG={w:800,h:600};
+function login(){
+ $('tabs').hidden=true;
+ app.innerHTML=`<div style="max-width:340px;margin:3rem auto"><h2>Owner login</h2>
+ ${Shop.live?'<label>Email</label><input id="em" type="email" class="field">':'<div class="banner">Demo mode – password: <b>'+CFG.demoPassword+'</b></div>'}
+ <label>Password</label><input id="pw" type="password" class="field"><p id="err" style="color:#c62828"></p><button class="btn" id="go">Login</button></div>`;
+ $('go').onclick=async()=>{try{
+  if(Shop.live)await firebase.auth().signInWithEmailAndPassword($('em').value,$('pw').value);
+  else if($('pw').value===CFG.demoPassword)sessionStorage.setItem('rapti_admin','1');else throw 0;
+  render()}catch(e){$('err').textContent='Wrong login'}}}
+/* generic pop-up form */
+function openForm(title,fields,vals,save){
+ const d=$('dlg'),imgs={};vals=vals||{};
+ d.innerHTML=`<h3>${title}</h3>`+fields.map(f=>{const v=vals[f.k]??f.d??'';
+  if(f.t==='image')return `<label>${f.l}</label><img class="prev" id="pv_${f.k}" ${v?`src="${esc(v)}"`:'hidden'}><input type="file" accept="image/*" data-k="${f.k}"><small>Your photo is automatically cropped to the right shape.</small>`;
+  if(f.t==='textarea')return `<label>${f.l}</label><textarea id="f_${f.k}" rows="3">${esc(v)}</textarea>`;
+  if(f.t==='select')return `<label>${f.l}</label><select id="f_${f.k}">${f.o.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<label>${f.l}</label><input id="f_${f.k}" type="${f.t||'text'}" value="${esc(v)}" ${f.ph?`placeholder="${f.ph}"`:''}>`}).join('')
+ +`<div class="row"><button class="btn" id="sv">Save</button><button class="btn" style="background:#999" id="cx">Cancel</button></div>`;
+ d.querySelectorAll('input[type=file]').forEach(i=>i.onchange=async e=>{const f=fields.find(x=>x.k===i.dataset.k),file=e.target.files[0];if(!file)return;
+  imgs[f.k]=await crop(file,f.w||IMG.w,f.h||IMG.h);const p=$('pv_'+f.k);p.src=imgs[f.k];p.hidden=false});
+ $('cx').onclick=()=>d.close();
+ $('sv').onclick=async()=>{const o={};for(const f of fields)o[f.k]=f.t==='image'?(imgs[f.k]||vals[f.k]||''):f.t==='number'?(+$('f_'+f.k).value||0):$('f_'+f.k).value.trim();
+  const err=await save(o,imgs);if(err){alert(err);return}d.close();render()};
+ d.showModal()}
+const th=p=>p.image?`<img class="thumb" src="${esc(p.image)}">`:'<div class="thumb"></div>';
+const btns=(a,id)=>`<button class="icon ed" data-a="edit${a}" data-id="${id}"><i class="fas fa-pen"></i></button><button class="icon del" data-a="del${a}" data-id="${id}"><i class="fas fa-trash"></i></button>`;
+const PF=[{k:'name',l:'Name'},{k:'category',l:'Category',t:'select',o:['Fruit Saplings','Flowering','Indoor Plants','Outdoor Plants','Seeds & Supplies']},
+ {k:'price',l:'Price (Rs.)',t:'number'},{k:'discount',l:'Discount % (0 = none)',t:'number'},{k:'stock',l:'Stock',t:'number'},
+ {k:'description',l:'Short description',t:'textarea'},{k:'care',l:'Care instructions'},{k:'image',l:'Photo',t:'image'}];
+const SF=[{k:'title',l:'Service name'},{k:'description',l:'Short description',t:'textarea'},{k:'image',l:'Photo',t:'image'}];
+const INF=[{k:'tagline',l:'Footer tagline'},{k:'regName',l:'Registered business name'},{k:'pan',l:'PAN/VAT number'},{k:'regNo',l:'Registration number'},
+ {k:'address',l:'Address'},{k:'mapLink',l:'Google Maps link'},{k:'phone1',l:'Phone 1'},{k:'phone2',l:'Phone 2'},{k:'whatsapp',l:'WhatsApp number (orders go here)'},
+ {k:'email',l:'Email'},{k:'hours',l:'Opening hours',ph:'e.g. Sun–Fri 8am–6pm'},{k:'facebook',l:'Facebook link'},{k:'instagram',l:'Instagram link'},{k:'tiktok',l:'TikTok link'},{k:'youtube',l:'YouTube link'}];
+const VIEWS={
+ async plants(){const l=(await Store.list('plants')).sort((a,b)=>a.name.localeCompare(b.name));
+  app.innerHTML=`<div class="stats"><div class="stat">Total varieties<b>${l.length}</b></div><div class="stat">Total stock units<b>${l.reduce((a,p)=>a+(+p.stock||0),0)}</b></div></div><h2>Manage Store Inventory</h2>`+
+  l.map(p=>`<div class="item">${th(p)}<div class="info"><b>${esc(p.name)}</b><br><small>${esc(p.category)} | ${Shop.priceHTML(p)}</small></div>
+  <div class="stock">Stock <button data-a="dec" data-id="${p.id}">−</button><b>${p.stock}</b><button data-a="inc" data-id="${p.id}">+</button></div>${btns('P',p.id)}</div>`).join('')+'<button class="fab" data-a="addP"><i class="fas fa-plus"></i> Add New Plant</button>';
+  return l},
+ async services(){const l=(await Store.list('services')).sort((a,b)=>(a.ts||0)-(b.ts||0));
+  app.innerHTML='<h2>Decoration Services</h2><p>Photos and text shown on the Decoration Services page and home page.</p>'+l.map(s=>`<div class="item">${th(s)}<div class="info"><b>${esc(s.title)}</b><br><small>${esc(s.description)}</small></div>${btns('S',s.id)}</div>`).join('')+'<button class="fab" data-a="addS"><i class="fas fa-plus"></i> Add Service</button>';return l},
+ async gallery(){const l=(await Store.list('gallery')).sort((a,b)=>(b.ts||0)-(a.ts||0));
+  app.innerHTML=`<h2>Gallery</h2><p>${l.length} photos. Tap the red bin to remove one.</p><div class="gal">`+l.map(g=>`<div><img src="${esc(g.image)}"><button data-a="delG" data-id="${g.id}"><i class="fas fa-trash"></i></button></div>`).join('')+'</div><button class="fab" data-a="addG"><i class="fas fa-plus"></i> Add Photos</button>';return l},
+ async home(){const [h,a,i]=await Promise.all([Store.get('site','hero'),Store.get('site','about'),getInfo()]);
+  app.innerHTML=`<h2>Home & About</h2><div class="card"><h3>Home page background</h3>${h&&h.image?`<img class="prev" style="aspect-ratio:16/9" src="${esc(h.image)}">`:'<p>No photo yet.</p>'}
+  <p><b>${esc(i.heroTitle||'Welcome to Rapti Nursery')}</b></p><button class="btn" data-a="hero">Change background & heading</button></div>
+  <div class="card"><h3>About page photo</h3>${a&&a.image?`<img class="prev" src="${esc(a.image)}">`:'<p>No photo yet.</p>'}<button class="btn" data-a="about">Change photo</button></div>`;return {h,a,i}},
+ async footer(){const i=await getInfo();app.innerHTML=`<h2>Footer & Business info</h2><p>Shown at the bottom of every page. Empty fields are hidden.</p><div class="card">${INF.map(f=>`<p><small>${f.l}</small><br>${esc(i[f.k]||'—')}</p>`).join('')}<button class="btn" data-a="info">Edit business info</button></div>`;return i}
+};
+async function render(){
+ if(!authed())return login();
+ $('out').hidden=false;const t=$('tabs');t.hidden=false;
+ t.innerHTML=Object.entries(TABS).map(([k,v])=>`<button data-t="${k}" class="${k===tab?'on':''}">${v}</button>`).join('');
+ const data=await VIEWS[tab]();app.insertAdjacentHTML('afterbegin',demo());
+ t.onclick=e=>{const k=e.target.dataset.t;if(k){tab=k;render()}};
+ app.onclick=async e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;if(!a)return;const id=b.dataset.id,row=Array.isArray(data)?data.find(x=>x.id===id):null;
+  if(a==='inc'||a==='dec'){row.stock=Math.max(0,row.stock+(a==='inc'?1:-1));await Store.put('plants',id,row);render()}
+  if(a==='editP'||a==='addP')openForm(row?'Edit plant':'Add new plant',PF,row||{stock:0,price:0,discount:0},async o=>{if(!o.name)return'Enter a name';await Store.put('plants',row&&row.id,o)});
+  if(a==='editS'||a==='addS')openForm(row?'Edit service':'Add service',SF,row||{},async o=>{if(!o.title)return'Enter a name';await Store.put('services',row&&row.id,{...o,ts:row?.ts||Date.now()})});
+  if(a==='addG')$('multi').click();
+  if(a.startsWith('del')){const c=a[3];if(confirm('Delete this?')){await Store.del({P:'plants',S:'services',G:'gallery'}[c],id);render()}}
+  if(a==='hero')openForm('Home page background',[{k:'image',l:'Background photo (wide)',t:'image',w:1600,h:900},{k:'heroTitle',l:'Heading',d:data.i.heroTitle||'Welcome to Rapti Nursery'},{k:'heroText',l:'Sub-heading',t:'textarea',d:data.i.heroText||'Discover premium plants and bespoke decoration services to bring nature into your life.'}],{image:data.h?.image,heroTitle:data.i.heroTitle,heroText:data.i.heroText},async o=>{
+   await Store.put('site','hero',{image:o.image});await Store.put('site','info',{...data.i,heroTitle:o.heroTitle,heroText:o.heroText});_info=null});
+  if(a==='about')openForm('About page photo',[{k:'image',l:'Photo',t:'image'}],{image:data.a?.image},async o=>{await Store.put('site','about',{image:o.image})});
+  if(a==='info')openForm('Business info',INF,data,async o=>{await Store.put('site','info',{...data,...o});_info=null})}}
+$('multi').onchange=async e=>{for(const f of e.target.files)await Store.put('gallery',null,{image:await crop(f,IMG.w,IMG.h),ts:Date.now()});e.target.value='';render()};
+$('out').onclick=async()=>{Shop.live?await firebase.auth().signOut():sessionStorage.removeItem('rapti_admin');location.reload()};
+Shop.live?firebase.auth().onAuthStateChanged(render):render();
+</script></body></html>
